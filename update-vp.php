@@ -2,20 +2,18 @@
 if ( ! defined( 'VCTAccess' ) ) {
     die( 'Direct access denied' );
 }
-// Leading, non-zero number of version - used for compatibility checks in the main scripts
-$_version = '5';
 /**
- * VerusChainTools Installer
+ * VerusChainTools VerusPay-integrated Updater
  * 
- * Description: This file is a one-time installer for a first-use of VerusChainTools
+ * Description: This file is the VerusPay integrated updater for VerusChainTools
  * 
  * Included files:
  *      index.php
  *      verusclass.php
  *      lang.php
  *      update.php
- *      update-vp.php
- *      install.php (this file)
+ *      update-vp.php (this file)
+ *      install.php
  *      demo.php
  *
  * @category Cryptocurrency
@@ -51,18 +49,6 @@ $_version = '5';
  * 
  * ====================
  */
-$accessCode = $_version . rand_chars( 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890', 71, TRUE );
-$updateCode = 'U' . $_version . rand_chars( 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890', 70, TRUE );
-// TODO: Build function to check for Verus daemon as minimun prerequisite for installation
-function rand_chars($c, $l, $u = FALSE) {
-    if ( !$u ) {
-        for ($s = '', $i = 0, $z = strlen($c)-1; $i < $l; $x = rand(0,$z), $s .= $c{$x}, $i++);
-    }
-    else {
-        for ($i = 0, $z = strlen($c)-1, $s = $c{rand(0,$z)}, $i = 1; $i != $l; $x = rand(0,$z), $s .= $c{$x}, $s = ($s{$i} == $s{$i-1} ? substr($s,0,-1) : $s), $i=strlen($s));
-    }
-    return $s;
-}
 ?>
 <html lang="en">
 <head>
@@ -74,25 +60,8 @@ function rand_chars($c, $l, $u = FALSE) {
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <style>
-        body {
-            max-width: 1200px;
-            margin: auto;
-            padding: 20px 10px;
-        }
-        header {
-            height: 100px;
-            font-family: arial;
-            font-size: 4rem;
-            line-height: 100px;
-            font-weight: bold;
-            text-align: center;
-            border-bottom: 1px solid #545454;
-            padding: 10px;
-            margin-bottom: 40px;
-        }
         main {
-            padding: 20px;
-            font-family: arial;
+            font-family: inherit;
             font-size: 1.6rem;
         }
         .content_top {
@@ -101,21 +70,14 @@ function rand_chars($c, $l, $u = FALSE) {
             position: relative;
         }
         .code_block-outer {
-            border-top: solid 10px #545454;
-            border-bottom: solid 10px #545454;
-            border-radius: 10px;
-            border-left: 1px solid #545454;
-            border-right: 1px solid #545454;
-            padding: 30px;
-            margin: 40px auto;
-            max-width: 900px;
+            padding-right:5px;
             display: block;
             position: relative;
             float: none;
         }
-        .code_block-outer > p {
+        .code_block-outer > p:first-child {
             font-weight: bold;
-            font-size: 2.2rem;
+            font-size: 1.8rem;
             text-align: center;
             display: block;
             float: none;
@@ -131,7 +93,7 @@ function rand_chars($c, $l, $u = FALSE) {
             padding: 5px 0;
             height: 60px;
         }
-        #copy_code, #copy_ucode {
+        #copy_code {
             height: 50px;
             max-width: 40px;
             display: block;
@@ -140,7 +102,7 @@ function rand_chars($c, $l, $u = FALSE) {
         }
         .copy_symbol {
             border: 1px #545454 solid;
-            border-radius: 5px;
+            border-radius: 10px;
             display: block;
             height: 40px;
             line-height: 38px;
@@ -154,7 +116,7 @@ function rand_chars($c, $l, $u = FALSE) {
             height: 40px;
             width: 30px;
             border: 1px solid #545454;
-            border-radius: 5px;
+            border-radius: 10px;
             left: 5px;
             top: 5px;
             background: #fff;
@@ -167,7 +129,7 @@ function rand_chars($c, $l, $u = FALSE) {
             cursor:pointer;
             color: #FB5656;
         }
-        #access_code-container, #update_code-container {
+        #access_code-container {
             width: 90%;
             display: block;
             line-height: 50px;
@@ -179,13 +141,13 @@ function rand_chars($c, $l, $u = FALSE) {
             border: 1px dotted #FB5656;
             margin: 0 10px;
         }
-        #access_code, #update_code {
+        #access_code {
             text-align: center;
             color: #FB5656;
             font-weight: bold;
             font-size: 1.6rem;
         }
-        #success_div, #usuccess_div {
+        #success_div {
             display:none;
             top: 0;
             left: 0;
@@ -197,28 +159,31 @@ function rand_chars($c, $l, $u = FALSE) {
             background: #fff;
             font-weight: bold;
              color: #FB5656;
-            font-size: 2.5rem;
+            font-size: 2rem;
         }
         #config {
             display: block;
             width: 100%;
         }
         .easytitle {
-            font-size: 2.6rem;
+            font-size: 2rem;
             color: #3f79a2;
             display: inline-block;
             margin: 30px 0;
+            width:100%;
         }
         .chain_del {
-            display: inline;
+            display: inline-block;
             padding: 5px;
-            border-radius: 5px;
+            border-radius: 10px;
             background: #ff0000b0;
-            width: 200px;
+            width: 140px;
             color: #fff;
             text-align: center;
             margin: 0 10px;
             cursor: pointer;
+            height: 36px;
+            float: right;
         }
         .addr_block {
             padding: 5px;
@@ -238,8 +203,25 @@ function rand_chars($c, $l, $u = FALSE) {
             margin: 5px 0;
             background: #f8f8f8;
             border: 1px solid #68afff;
-            border-radius: 5px;
+            border-radius: 10px;
             padding: 4px;
+            height: 40px;
+            font-size: 2rem;
+            padding-left: 10px;
+        }
+        .dropdown {
+            border: 1px solid #68afff;
+            height: 40px;
+            border-radius: 10px;
+            margin: 0 10px;
+        }
+        .box {
+            width: 20px;
+            height: 20px;
+            margin: 10px;
+            bottom: -3px;
+            display: inline-block;
+            position: relative;
         }
         .add_chain_container {
             display: block;
@@ -268,6 +250,7 @@ function rand_chars($c, $l, $u = FALSE) {
             display: block;
             float: none;
             text-align:right;
+            line-height: 30px;
             transition:all 0.5s ease;
         }
         #add_new:hover {
@@ -282,16 +265,19 @@ function rand_chars($c, $l, $u = FALSE) {
         .submit_button {
             display: block;
             float: none;
-            width: 180px;
+            width: 160px;
             background: #FB5656;
-            border:1px solid #FB5656;
-            border-radius:5px;
+            border: 1px solid #FB5656;
             padding: 5px;
             color: #fff;
-            font-size: 2rem;
             font-weight: bold;
             margin: 5px auto;
-            transition:all 0.5s ease;
+            height: 45px;
+            border-radius: 15px;
+            font-size: 24px;
+            text-transform: uppercase;
+            line-height: 40px;
+            transition: all 0.5s ease;
         }
         .submit_button:hover {
             background:#ffffff;
@@ -300,29 +286,20 @@ function rand_chars($c, $l, $u = FALSE) {
         .addr_block_template {
             height:0;
             opacity:0;
+            overflow:hidden;
         }
          footer {
             border-top: 1px solid #545454;
         }
         @media (max-width:767px) {
-            header {
-                min-height: 100px;
-                height: auto;
-                font-size: 2.5rem;
-                line-height: 3rem;
-            }
             main {
-                font-size: 1.6rem;
-                padding: 0 5px;
+                font-size: 1.4rem;
             }
-            .code_block-outer {
-                padding: 20px 4px;
-            }
-            #copy_code, #copy_ucode {
+            #copy_code {
                 min-width: 40px;
                 width: calc(100% * 1/8);
             }
-            #access_code-container, #update_code-container {
+            #access_code-container {
                 width: calc(100% * 6/8);
             }
         }
@@ -330,58 +307,47 @@ function rand_chars($c, $l, $u = FALSE) {
 
 </head>
 <body>
-    <header>
-        <div>Welcome to the VerusChainTools Installer</div>
-    </header>
     <main>
-        <div class="content_top">
-            <p>Thank you for installing VerusChainTools! Below is your unique Access Code and Update Code. Keep your Update Code in a secure location for future use, if you ever need to add more blockchain daemons or update any of your config settings. Your Access Code is for use with either VerusPay or the web tool you are using with the VerusChainTools API. Please verify the first number of your Access Code matches the first non-zero version number of this VerusChainTools API which you're installing.  For example, "4" would match with VerusChainTools version 0.4.2.  If it does not match, abandon this install and contact the developer.</p>
-            <p></p>
-            <p></p>
-            <p>After adding your chains and any payout addresses (for VerusPay users), click Save and your config file will be created locally on this server and this installation script will be removed.  If you need to change something or update these settings in the future, visit this same script and append the following to the URL: ?code=YOUR_PRIVATE_UPDATE_CODE ( e.g. https://127.127.27.27/?code=YourPrivateUpdateCode )</p>
-            <p></p>
-        </div>
         <div class="code_block-outer">
-            <p>Your Unique Acces Code:</p>
-            <div class="code_block-inner">
-                <div id="copy_code">
-                    <span class="copy_symbol"></span>
-                </div>
-                <div id="access_code-container">
-                    <p id="access_code"><?php echo $accessCode; ?></p>
-                    <p id="success_div" style="z-index:999">Access Code Copied</p>
-                </div>
-            </div>
-            <p>Your Private Update Code:</p>
-            <div class="code_block-inner">
-                <div id="copy_ucode">
-                    <span class="copy_symbol"></span>
-                </div>
-                <div id="update_code-container">
-                    <p id="update_code"><?php echo $updateCode; ?></p>
-                    <p id="usuccess_div">Update Code Copied</p>
-                </div>
-            </div>
+            
             <form id="config" name="config" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="POST">
-                <input type="hidden" name="S" value="s">
-                <input type="hidden" name="D" value="<?php echo date( 'Y-m-d H:i:s', time() ); ?>">
-                <input type="hidden" name="A" value="<?php echo $accessCode; ?>">
-                <input type="hidden" name="U" value="<?php echo $updateCode; ?>">
-                <div class="main_container" style="display: block;float: left;width: 100%;padding: 0 0 20px 0;margin: 10px auto;">
-    <p style="font-weight: bold;font-size: 2.2rem;text-align: center;display: block;float: none;margin: 0 auto;width: 100%;padding: 5px 0;margin-top: 20px;">Choose VerusChainTools Mode and Language:</p>
-    <span style="font-size: 16px;padding: 0 0 20px;display: block;">Choose how you intend to use VerusChainTools and your preferred language.</span>
-                    <select name="m" id="vct_mode" style="display: block;width: 100%;margin: 10px 40px;max-width: 300px;">
-                        <option value="_vp_" selected="">VerusPay WordPress Mode</option>
-                        <option value="_bg_">Full Bridge Mode</option>
-                        <option value="_lt_">Limited Mode</option>
-                    </select>
-                    <input name="f" id="vct_limits" placeholder="Enter allowed/whitelisted valid method names seperated by a comma" style="display: none;width: 80%;margin: 10px 40px;" value="getinfo,setgenerate,getgenerate,getnewaddress,z_getnewaddress,z_getbalance,getunconfirmedbalance,getaddressesbyaccount,z_listaddresses,getreceivedbyaddress,definechain,getchaindefinition,getdefinedchains">
-                    <select name="l" id="vct_lang" style="display: block;margin: 10px 40px;width: 300px;">
-                        <option value="eng" selected="">English</option>
-                    </select>
-                </div>
+                <input type="hidden" name="code" value="<?php echo $_GET['code']; ?>">
+                <input type="hidden" name="S" value="u">
+                <input type="hidden" name="update" value="2">
+                <?php
+                    foreach ( $c['C'] as $key => $value ) {
+                        $sel = array(
+                            0 => '',
+                            1 => '',
+                            2 => '',
+                        );
+                        $adr = array(
+
+                        );
+                        $sel[$c['C'][$key]['TX']] = 'selected';
+                        
+                        if ( $sel['0'] == 'selected' ) {
+                            $addresses = '<input id="'.$key.'_t" class="addr_text taddr" placeholder="Transparent Payout Address (leave empty if unsupported or not desired)" type="text" value="'.$c['C'][$key]['T'].'" name="'.$key.'_t"><input id="'.$key.'_z" class="addr_text zaddr" placeholder="Private (Sapling) Payout Address (leave empty if unsupported or not desired)" type="text" value="'.$c['C'][$key]['Z'].'" name="'.$key.'_z">';
+                        }
+                        if ( $sel['1'] == 'selected' ) {
+                            $addresses = '<input id="'.$key.'_t" class="addr_text taddr" placeholder="Transparent Payout Address (leave empty if unsupported or not desired)" type="text" value="'.$c['C'][$key]['T'].'" name="'.$key.'_t"><input id="'.$key.'_z" class="addr_text zaddr" placeholder="Private (Sapling) Payout Address (leave empty if unsupported or not desired)" type="text" value="" name="" style="display:none;">';
+                        }
+                        if ( $sel['2'] == 'selected' ) {
+                            $addresses = '<input id="'.$key.'_t" class="addr_text taddr" placeholder="Transparent Payout Address (leave empty if unsupported or not desired)" type="text" value="" name="" style="display:none;"><input id="'.$key.'_z" class="addr_text zaddr" placeholder="Private (Sapling) Payout Address (leave empty if unsupported or not desired)" type="text" value="'.$c['C'][$key]['Z'].'" name="'.$key.'_z">';
+                        }
+                        $gs = '';
+                        $gm = '';
+                        if ( isset( $c['C'][$key]['GS'] ) && $c['C'][$key]['GS'] == '1' ) {
+                            $gs = 'checked';
+                        }
+                        if ( isset( $c['C'][$key]['GM'] ) && $c['C'][$key]['GM'] == '1' ) {
+                            $gm = 'checked';
+                        }
+                        echo '<div class="addr_block '.$key.'_container"><span class="easytitle"><span class="addr">'.$key.'</span> Chain Settings<span class="chain_del" data-chain="'.$key.'">delete chain</span></span><input class="addr_text friendly" type="text" name="'.$key.'_name" value="'.$c['C'][$key]['FN'].'" placeholder="Friendly name e.g. Verus"><label class="dropdown_label" style="display: block;font-weight:normal;"> TX Capabilities:<select class="dropdown chain_capabilities" data-chain="'.$key.'" name="'.$key.'_txtype" style="min-width: 300px;"><option value="0" '.$sel['0'].'>Transparent and Private</option><option value="1" '.$sel['1'].'>Transparent Only</option><option value="2" '.$sel['2'].'>Private zs Only</option></select></label><span class="easytitle">Enable Mining/Staking?</span><div class="boxes"><p><input class="box gs" type="checkbox" name="'.$key.'_gs" value="1" '.$gs.'><label>Enable Staking (if supported)</label></p><p><input class="box gm" type="checkbox" name="'.$key.'_gm" value="1" '.$gm.'><label>Enable Mining (if supported)</label></p></div><span class="easytitle">Payout Addresses</span><input class="addr_name" type="hidden" value="'.$key.'" name="c[]">'.$addresses.'</div>';
+                    }
+                ?>
                 <div id="addr_block_location"></div>
-                <p style="font-weight: bold;font-size: 2.2rem;text-align: center;display: block;float: none;margin: 0 auto;width: 100%;padding: 5px 0;margin-top: 20px;">Add Your Chains:</p>
+                <p style="font-weight: bold;font-size: 2.2rem;text-align: center;display: block;float: none;margin: 0 auto;width: 100%;padding: 5px 0;margin-top: 20px;">Add New Chains:</p>
                 <span style="font-size: 16px;padding: 0 0 20px;display: block;">Add the chains/coins by entering the chain symbol and clicking the Add Chain button.  Add chains this wallet server will access, one at a time and enter the appropriate Payout address (if desired/compatible) for each chain added.  Only add chains for which you have the daemon installed and running on this wallet server.</span>
                 <div class="add_chain_container">
                     <input id="chain_name" name="" type="text" placeholder="VRSC" value="">
@@ -393,8 +359,6 @@ function rand_chars($c, $l, $u = FALSE) {
             </form>
         </div>
     </main>
-    <footer>
-    </footer>
     <script>
     jQuery( function( $ ) {
         $('select[name="m"]').change(function(){
@@ -405,7 +369,7 @@ function rand_chars($c, $l, $u = FALSE) {
                 $('#vct_limits').val('').attr('name','').fadeOut();
             }
             if($(this).val() == "_vp_"){
-                $('#vct_limits').fadeOut().val('getinfo,setgenerate,getgenerate,getnewaddress,z_getnewaddress,z_getbalance,getunconfirmedbalance,getaddressesbyaccount,z_listaddresses,getreceivedbyaddress,definechain,getchaindefinition,getdefinedchains').attr('name','f');
+                $('#vct_limits').fadeOut().val('setgenerate,getgenerate,getnewaddress,z_getnewaddress,z_getbalance,getunconfirmedbalance,getaddressesbyaccount,z_listaddresses,getreceivedbyaddress').attr('name','f');
             }
         });
         $(document).on('change', '.chain_capabilities', function(){
@@ -435,17 +399,6 @@ function rand_chars($c, $l, $u = FALSE) {
             document.execCommand('copy');
             $temp.remove();
             $('#success_div').fadeIn('slow', function () {
-                $(this).delay(1000).fadeOut('slow');
-            });
-        });
-        $('#copy_ucode').on('click touchstart', function(){
-            var $temp = $("<input>");
-            var $addr = $('#update_code').text();
-            $("body").append($temp);
-            $temp.val($('#update_code').text()).select();
-            document.execCommand('copy');
-            $temp.remove();
-            $('#usuccess_div').fadeIn('slow', function () {
                 $(this).delay(1000).fadeOut('slow');
             });
         });

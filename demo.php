@@ -17,15 +17,16 @@ $d = array(
  *      verusclass.php
  *      lang.php
  *      update.php
+ *      update-vp.php
  *      install.php (temporary installer)
  *      demo.php (this file)
  *
  * @category Cryptocurrency
  * @package  VerusChainTools
- * @author   Oliver Westbrook <johnwestbrook@pm.me>
+ * @author   Oliver Westbrook 
  * @copyright Copyright (c) 2019, John Oliver Westbrook
  * @link     https://github.com/joliverwestbrook/VerusChainTools
- * @version 0.4.0
+ * @version 0.5.2
  * 
  * ====================
  * 

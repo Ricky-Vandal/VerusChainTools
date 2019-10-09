@@ -1,4 +1,7 @@
 <?php
+if ( ! defined( 'VCTAccess' ) ) {
+    die( 'Direct access denied' );
+}
 /**
  * VerusChainTools Updater
  * 
@@ -9,15 +12,16 @@
  *      verusclass.php
  *      lang.php
  *      update.php (this file)
+ *      update-vp.php
  *      install.php
  *      demo.php
  *
  * @category Cryptocurrency
  * @package  VerusChainTools
- * @author   Oliver Westbrook <johnwestbrook@pm.me>
+ * @author   Oliver Westbrook 
  * @copyright Copyright (c) 2019, John Oliver Westbrook
  * @link     https://github.com/joliverwestbrook/VerusChainTools
- * @version 0.4.0
+ * @version 0.5.2
  * 
  * ====================
  * 
@@ -326,8 +330,9 @@
         <div class="code_block-outer">
             
             <form id="config" name="config" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="POST">
-                <input type="hidden" name="update" value="<?php echo $_GET['update']; ?>">
+                <input type="hidden" name="code" value="<?php echo $_GET['code']; ?>">
                 <input type="hidden" name="S" value="u">
+                <input type="hidden" name="update" value="2">
                 <div class="main_container" style="display: block;float: left;width: 100%;padding: 0 0 20px 0;margin: 10px auto;">
 
     <p style="font-weight: bold;font-size: 2.2rem;text-align: center;display: block;float: none;margin: 0 auto;width: 100%;padding: 5px 0;margin-top: 20px;">Update Settings for Configured Chain Daemons:</p>
@@ -356,10 +361,10 @@
                         }
                         $gs = '';
                         $gm = '';
-                        if ( $c['C'][$key]['GS'] == '1' ) {
+                        if ( isset( $c['C'][$key]['GS'] ) && $c['C'][$key]['GS'] == '1' ) {
                             $gs = 'checked';
                         }
-                        if ( $c['C'][$key]['GM'] == '1' ) {
+                        if ( isset( $c['C'][$key]['GM'] ) && $c['C'][$key]['GM'] == '1' ) {
                             $gm = 'checked';
                         }
                         echo '<div class="addr_block '.$key.'_container"><span class="easytitle"><span class="addr">'.$key.'</span> Chain Settings<span class="chain_del" data-chain="'.$key.'">delete chain</span></span><input class="addr_text friendly" type="text" name="'.$key.'_name" value="'.$c['C'][$key]['FN'].'" placeholder="Friendly name e.g. Verus"><label class="dropdown_label" style="display: block;font-weight:normal;"> TX Capabilities:<select class="dropdown chain_capabilities" data-chain="'.$key.'" name="'.$key.'_txtype" style="min-width: 300px;"><option value="0" '.$sel['0'].'>Transparent and Private</option><option value="1" '.$sel['1'].'>Transparent Only</option><option value="2" '.$sel['2'].'>Private zs Only</option></select></label><span class="easytitle">Enable Mining/Staking?</span><div class="boxes"><p><input class="box gs" type="checkbox" name="'.$key.'_gs" value="1" '.$gs.'><label>Enable Staking (if supported)</label></p><p><input class="box gm" type="checkbox" name="'.$key.'_gm" value="1" '.$gm.'><label>Enable Mining (if supported)</label></p></div><span class="easytitle">Payout Addresses</span><input class="addr_name" type="hidden" value="'.$key.'" name="c[]">'.$addresses.'</div>';
@@ -432,6 +437,7 @@
                 $(newAddr).children('.easytitle').children('.addr').text(chn.toUpperCase());
                 $(newAddr).children('.easytitle').children('.chain_del').data('chain', chn);
                 $(newAddr).children('.friendly').attr('name',chn+'_name');
+                $(newAddr).children('.chaindir').attr('name',chn+'_dir');
                 $(newAddr).children('.boxes').children('p').children('.gs').attr('name',chn+'_gs');
                 $(newAddr).children('.boxes').children('p').children('.gm').attr('name',chn+'_gm');
                 $(newAddr).children('.taddr').attr('name',chn+'_t').attr('id',chn+'_t');
@@ -457,6 +463,7 @@
         <span class="addr"></span> Chain Settings<span class="chain_del" data-chain="">delete chain</span>
     </span>
     <input class="addr_text friendly" type="text" name="" value="" placeholder="Friendly name e.g. Verus">
+    <input class="addr_text chaindir" type="text" name="" value="" placeholder="Enter the folder location, i.e. /home/user/.komodo/VRSC">
     <label class="dropdown_label" style="display: block;font-weight:normal;"> TX Capabilities:
         <select class="dropdown chain_capabilities" data-chain="" name="" style="min-width: 300px;">
             <option value="0">Transparent and Private</option>
